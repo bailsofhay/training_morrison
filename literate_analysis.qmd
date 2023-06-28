@@ -1,0 +1,71 @@
+---
+title: "Literate_analysis"
+author: "Bailey D Morrison"
+format: html
+editor: visual
+---
+
+## Introduction
+
+### About this data
+This data set contains North Pole Environmental Observatory Bottle Chemistry data. This data set includes diverse measurements of seawater chemistry along with supporting conductivity, temperature, and depth (CTD) data from the Arctic Ocean near the North Pole. Measurements were taken from sea ice platforms each April or May from 2000-2014.
+[https://arcticdata.io/catalog/view/doi:10.18739/A25T3FZ8X](https://arcticdata.io/catalog/view/doi:10.18739/A25T3FZ8X)
+
+### Setup
+```{r}
+#| message: false
+require(readr)
+```
+
+### Read in data
+```{r}
+#| warning: false
+#| message: false
+bg_chem = read_csv("data/BGchem2008data.csv")
+```
+
+Exploring data
+```{r}
+#| eval: false
+#| echo: false
+colnames(bg_chem)
+
+str(bg_chem)
+
+head(bg_chem)
+
+summary(bg_chem)
+
+unique(bg_chem$Date)
+```
+
+
+## Analysis
+
+### Calcualte summary stats
+```{r}
+#| warning: false
+#| message: false
+nitrate = mean(bg_chem$NO3, na.rm =T)
+nitrite = mean(bg_chem$NO2, na.rm = T)
+amm = mean(bg_chem$NH4, na.rm = T)
+phos = mean(bg_chem$P, na.rm = T)
+```
+
+### Calculate mean Redfield Ratio
+```{r}
+#| warning: false
+#| message: false
+ratio = (nitrate + nitrite + amm)/phos
+print(ratio)
+```
+
+### Plot Redfield Ratio
+```{r}
+plot(bg_chem$P, (bg_chem$NH4 + bg_chem$NO3 + bg_chem$NO2), xlab = "Phosphorus", ylab = "Nitrogen")
+```
+
+
+## Conclusion
+Redfield Ratio for this data is `r round(ratio, 0)`.
+
