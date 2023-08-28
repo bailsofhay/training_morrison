@@ -1,0 +1,73 @@
+---
+title: "data-visualization"
+format: html
+---
+
+# Setup
+
+## Load Packages
+```{r}
+#| warning: false
+#| message: false
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(forcats) # makes working with factors easier
+library(ggplot2)
+library(leaflet) # interactive maps
+library(DT) # interactive tables
+library(scales) # scale functions for visualization
+library(janitor) # expedite cleaning and exploring data
+library(viridis) # colorblind friendly color pallet
+```
+
+## Load Data
+```{r}
+#| warning: false
+#| message: false
+delta_visits <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.587.1&entityid=cda8c1384af0089b506d51ad8507641f") %>% 
+    janitor::clean_names() ## Introducing this new package!
+```
+
+## Explore Data
+```{r}
+#| warning: false
+#| message: false
+
+## Check out column names
+colnames(delta_visits)
+
+## Peak at each column and class
+glimpse(delta_visits)
+
+## From when to when
+range(delta_visits$date)
+
+## First and last rows
+head(delta_visits)
+tail(delta_visits)
+
+## Which time of day?
+unique(delta_visits$time_of_day)
+```
+
+# Get Data Ready
+
+## Make Long
+```{r}
+#| warning: false
+#| message: false
+
+visits_long <- delta_visits %>% 
+    pivot_longer(cols = c("sm_boat", "med_boat", "lrg_boat", "bank_angler", "scientist", "cars"),
+                 names_to = "visitor_type",
+                 values_to = "quantity") %>%
+    rename(restore_loc = eco_restore_approximate_location) %>% 
+    select(-notes)
+
+## Checking the outcome
+head(visits_long)
+```
+
+
