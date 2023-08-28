@@ -70,4 +70,24 @@ visits_long <- delta_visits %>%
 head(visits_long)
 ```
 
+## Plotting with `ggplot2`
+
+```{r}
+#| warning: false
+#| message: false
+
+ggplot(visits_long, aes(x = restore_loc, y = quantity))+
+  geom_col()
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+daily_visits = visits_long %>%
+  group_by(restore_loc, date, visitor_type) %>%
+  summarise(daily_visits = sum(quantity))
+
+head(daily_visits)
+```
 
