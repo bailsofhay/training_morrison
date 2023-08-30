@@ -1,0 +1,222 @@
+---
+title: "Spatial Analysis"
+author: "Bailey Morrison"
+format: html
+---
+
+# About the data
+## Setup
+```{r}
+# knb_url <- 'https://dev.nceas.ucsb.edu/knb/d1/mn/v2/object/urn%3Auuid%3Aaceaecb2-1ce0-4d41-a839-d3607d32bb58'
+# download.file(url = knb_url, destfile = 'demo_data.zip')
+# unzip('demo_data.zip', exdir = 'data')
+# file.remove('demo_data.zip')
+```
+
+## Load Libraries
+```{r}
+#| warning: false
+#| message: false
+
+library(readr)
+library(sf)
+library(ggplot2)
+library(leaflet)
+library(scales)
+library(ggmap)
+library(dplyr)
+```
+
+## xploring the data using  `plot()` and `st_crs()`
+```{r}
+#| warning: false
+#| message: false
+
+# read in shapefile using read_sf()
+ak_regions <- read_sf("data/ak_regions_simp.shp")
+
+# quick plot
+plot(ak_regions)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+class(ak_regions)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+head(ak_regions)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+glimpse(ak_regions)
+```
+
+## Coordinate Reference System (CRS)
+```{r}
+#| warning: false
+#| message: false
+
+st_crs(ak_regions)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+ak_regions_3338 <- ak_regions %>%
+    st_transform(crs = 3338)
+
+st_crs(ak_regions_3338)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+plot(ak_regions_3338)
+```
+
+# `sf` & the Tidyverse
+## `select()'
+```{r}
+#| warning: false
+#| message: false
+
+# returns the names of all the columns in dataset
+colnames(ak_regions_3338)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+ak_regions_3338 %>%
+    select(region)
+```
+
+## `filter()`
+```{r}
+#| warning: false
+#| message: false
+
+unique(ak_regions_3338$region)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+ak_regions_3338 %>%
+    filter(region == "Southeast")
+```
+
+# Spatial Joins
+##  Read in alaska_population.csv using `read.csv()`
+```{r}
+#| warning: false
+#| message: false
+
+# read in population data
+pop <- read_csv("data/alaska_population.csv")
+```
+
+## Turn `pop` into a spatial object
+```{r}
+#| warning: false
+#| message: false
+
+pop_4326 <- st_as_sf(pop,
+                     coords = c('lng', 'lat'),
+                     crs = 4326,
+                     remove = F)
+
+head(pop_4326)
+```
+## Example: Makes an error
+```{r}
+# #| warning: false
+# #| message: false
+# 
+# pop_joined <- st_join(pop_4326, ak_regions_3338, join = st_within)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+pop_3338 <- st_transform(pop_4326, crs = 3338)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+pop_joined <- st_join(pop_3338, ak_regions_3338, join = st_within)
+
+head(pop_joined)
+```
+
+## Calculate the total population by region using `group_by()` and `summarize()`
+```{r}
+#| warning: false
+#| message: false
+
+pop_region <- pop_joined %>%
+    as.data.frame() %>%
+    group_by(region) %>%
+    summarise(total_pop = sum(population))
+
+head(pop_region)
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+pop_region_3338 <- left_join(ak_regions_3338, pop_region, by = "region")
+
+# plot to check
+plot(pop_region_3338["total_pop"])
+```
+
+## Calculate the population by Alaska management area, as opposed to region
+```{r}
+#| warning: false
+#| message: false
+
+pop_mgmt_338 <- pop_region_3338 %>%
+    group_by(mgmt_area) %>%
+    summarize(total_pop = sum(total_pop))
+
+plot(pop_mgmt_338["total_pop"])
+```
+
+## If we don’t want to combine geometries, we can specify do_union = F as an argument
+```{r}
+#| warning: false
+#| message: false
+
+pop_mgmt_3338 <- pop_region_3338 %>%
+    group_by(mgmt_area) %>%
+    summarize(total_pop = sum(total_pop), do_union = F)
+
+plot(pop_mgmt_3338["total_pop"])
+```
+
+## Save the spatial object to a new file using` `write_sf()`
+```{r}
+#| warning: false
+#| message: false
+
+write_sf(pop_region_3338, "data/ak_regions_population.shp")
+```
+
