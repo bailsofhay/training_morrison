@@ -3,3 +3,126 @@ title: "Working with US Census Data"
 author: "Bailey Morrison"
 format: html
 ---
+
+# Introduction 
+## Load libraries
+```{r}
+#| warning: false
+#| message: false
+
+library(tidycensus)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Getting Started
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# census_api_key("96620d628b0643d7d30d64598152c24aac3aa973", install = TRUE, overwrite = T)
+```
+# Quering data (focus on 2020 decennial data)
+## Getting census data
+```{r}
+#| warning: false
+#| message: false
+
+pop_2020 <- get_decennial(
+    geography = "state",
+    variable = "P1_001N",
+    year = 2020)
+
+pop_2010 <- get_decennial(
+  geography = "state", 
+  variables = "P001001",
+  year = 2010)
+```
+
+## Specific table
+```{r}
+#| warning: false
+#| message: false
+
+table_p2_2020 <- get_decennial(
+    geography = "state",
+    table = "P2",
+    year = 2020)
+
+unique(table_p2_2020$variable)
+```
+
+## Variable codes and definitions for  PL 94-171 
+```{r}
+#| warning: false
+#| message: false
+
+## for 2020
+vars_pl_2020 <-  load_variables(2020, "pl")
+
+## for 2010
+vars_pl_2010 <-  load_variables(2010, "pl")
+```
+
+
+##  Demographic and Housing Characteristics File (DHC)
+```{r}
+#| warning: false
+#| message: false
+
+vars_dhc_2020 <-  load_variables(2020, "dhc")
+
+## Note you have to specify the file with sumfile =
+household_2020 <- get_decennial(
+    geography = "state",
+    variable = "H10_001N",
+    year = 2020,
+    sumfile = "dhc")
+```
+
+## Hispanic population the 6 counties around the Delta
+```{r}
+#| warning: false
+#| message: false
+
+delta_hispanic <- get_decennial(
+  geography = "county",
+  state = "CA",
+  county = c("Alameda", "Contra Costa", "Sacramento", "San Joaquin", "Solano", "Yolo"),
+  variables = "P2_002N",
+  year = 2020)
+```
+
+# Quering for multiple variabels
+## Concatenate function 
+```{r}
+#| warning: false
+#| message: false
+
+## Vector with race variables codes
+race_vars <- c(
+  Hispanic = "P2_002N",
+  White = "P2_005N",
+  Black = "P2_006N",
+  Native = "P2_007N",
+  Asian = "P2_008N",
+  HIPI = "P2_009N") ## Native Hawaiian and other Pacific Islander
+
+delta_race <- get_decennial(
+  geography = "county",
+  state = "CA",
+  county = c("Alameda", "Contra Costa", "Sacramento", "San Joaquin", "Solano", "Yolo"),
+  variables = race_vars,
+  summary_var = "P2_001N",
+  year = 2020)
+```
+
+# Getting Census Data ready for analysis
+
+
+
+
+
+
