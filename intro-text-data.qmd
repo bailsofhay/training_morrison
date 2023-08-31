@@ -1,0 +1,91 @@
+---
+title: "Working with Text Data"
+author: "Bailey Morrison"
+format: html
+---
+
+```{r}
+library(gutenbergr) # access public domain texts from Project Gutenberg
+library(tidytext) # text mining using tidy tools
+library(dplyr) # wrangle data
+library(ggplot2) # plot data
+```
+
+```{r}
+gutenberg_works(title == "Dracula") # dracula text
+```
+
+Get the id number from the gutenberg_works() function so that you can download the text as a corpus using the function gutenberg_download(). Save the corpus to an object called {book-title}_corp. View the object - is the data in a tidy format?
+```{r}
+dracula_corp = gutenberg_download(345)
+```
+
+Tokenize the corpus data using unnest_tokens(). Take a look at the data - do we need every single token for our analysis?
+```{r}
+tidy_dracula = dracula_corp %>%
+  unnest_tokens(word, text)
+```
+
+
+Remove “stop words” or words that can be safely removed or ignored without sacrificing the meaning of the sentence (e.g. “to”, “in”, “and”) using anti_join().
+
+Take a look at the data - are you satisfied with your data? We won’t conduct any additional cleaning steps here, but consider how you would further clean the data.
+```{r}
+tidy_dracula = tidy_dracula %>%
+  dplyr::anti_join(stop_words, by = "word")
+```
+
+Calculate the top 10 most frequent words using the functions count() and slice_max().
+```{r}
+count_dracula <- tidy_dracula %>%
+    count(word) %>% 
+    slice_max(n = 10, order_by = n)
+```
+
+```{r}
+# bar plot
+ggplot(data = count_dracula, aes(n, reorder(word, n))) +
+  geom_col() +
+    labs(x = "Count",
+         y = "Token")
+```
+
+```{r}
+# bar plot
+ggplot(data = count_dracula, aes(n, reorder(word, n))) +
+  geom_col(fill = "chartreuse4") +
+    labs(x = "Count",
+         y = "Token")+
+  ggtitle("Top 10 Dracula Words")+
+  theme_classic()+
+  theme(plot.title = element_text(size = 20),
+        axis.text.y = element_text(size = 12))
+```
+
+```{r}
+# initial lollipop plot
+ggplot(data = count_dracula, aes(x=word, y=n)) +
+    geom_point() +
+    geom_segment(aes(x=word, xend=word, y=0, yend=n)) +
+    coord_flip() +
+    labs(x = "Token",
+         y = "Count")
+
+```
+
+```{r}
+
+# ascending order pretty lollipop plot
+ggplot(data = count_dracula, aes(x=reorder(word, n), y=n)) +
+    geom_point(color="cyan4") +
+    geom_segment(aes(x=word, xend=word, y=0, yend=n), color="cyan4") +
+    coord_flip() +
+    labs(title = "Top Ten Words in The Phantom of the Opera",
+         x = NULL,
+         y = "Count") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.y = element_blank()
+    )
+```
+
