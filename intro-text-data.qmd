@@ -125,7 +125,7 @@ tidy_dp_ch3 = tidy_dp_ch3 %>%
 Remove stop words using anti_join() and the stop_words data frame from tidytext.
 ```{r}
 tidy_dp_ch3 = tidy_dp_ch3 %>%
-  dplyr::anti_join(stop_words, by = "word")
+  dplyr::anti_join(stop_words2, by = "word")
 ```
 
 Calculate the top 10 most frequently occurring words. Consider using count() and slice_max().
