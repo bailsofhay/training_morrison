@@ -4,6 +4,7 @@ author: "Bailey Morrison"
 format: html
 ---
 
+## Tidy Text Workflow
 ```{r}
 library(gutenbergr) # access public domain texts from Project Gutenberg
 library(tidytext) # text mining using tidy tools
@@ -89,3 +90,68 @@ ggplot(data = count_dracula, aes(x=reorder(word, n), y=n)) +
     )
 ```
 
+## Explore Unstructured Text Data from a PDF
+```{r}
+library(tidytext) # tidy text tools
+library(quanteda) # create a corpus
+library(pdftools) # read in data
+library(dplyr) # wrangle data
+library(stringr) # string manipulation
+library(ggplot2) # plots
+library(wordcloud)
+```
+
+```{r}
+# ch 3
+path_df <- "data/dsc-plan-ch3.pdf"
+dp_ch3 <- pdftools::pdf_text(path_df)
+```
+
+```{r}
+corpus_dp_ch3 <- quanteda::corpus(dp_ch3)
+```
+
+
+```{r}
+tidy_dp_ch3 <- tidytext::tidy(corpus_dp_ch3)
+```
+
+Tokenize the tidy text data using unnest_tokens()
+```{r}
+tidy_dp_ch3 = tidy_dp_ch3 %>%
+  unnest_tokens(word, text)
+```
+
+Remove stop words using anti_join() and the stop_words data frame from tidytext.
+```{r}
+tidy_dp_ch3 = tidy_dp_ch3 %>%
+  dplyr::anti_join(stop_words, by = "word")
+```
+
+Calculate the top 10 most frequently occurring words. Consider using count() and slice_max().
+```{r}
+count_dp_ch3 <- tidy_dp_ch3 %>%
+    count(word) %>% 
+    slice_max(n = 10, order_by = n)
+```
+
+
+Visualize the results using a plot of your choice (e.g. bar plot, lollipop plot, or wordcloud).
+```{r}
+# wordcloud
+wordcloud(words = count_dp_ch3$word,
+          freq = count_dp_ch3$n, 
+          color)
+```
+
+```{r}
+library(RColorBrewer)
+pal = brewer.pal(10, "RdYlBu")
+
+# wordcloud
+wordcloud(words = count_dp_ch3$word,
+          freq = count_dp_ch3$n, 
+          color = pal,
+          ordered.color = T,
+          )
+```
