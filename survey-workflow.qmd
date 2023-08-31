@@ -5,6 +5,8 @@ format: html
 
 ## Setup
 ```{r}
+#| warning: false
+#| message: false
 library(qualtRics)
 library(tidyr)
 library(knitr)
@@ -15,12 +17,16 @@ library(dplyr)
 
 
 ```{r}
+#| warning: false
+#| message: false
 # qualtrics_api_credentials(api_key = "Zzuvz4t36VkB5akSB8W3Dryg5YgZ9lowoc3JEfEN", base_url = "ucsb.co1.qualtrics.com", install = TRUE, overwrite = T)
 ```
 
 ## Get all surveys
 To get a list of all the surveys in your Qualtrics instance, use the all_surveys function.
 ```{r}
+#| warning: false
+#| message: false
 surveys <- all_surveys()
 kable(surveys) %>%
     kable_styling()
@@ -28,6 +34,8 @@ kable(surveys) %>%
 
 ## Save survey id
 ```{r}
+#| warning: false
+#| message: false
 i <- which(surveys$name == "Survey for Data Science Training")
 id <- surveys$id[i]
 ```
@@ -35,6 +43,8 @@ id <- surveys$id[i]
 ## Get questions
 You can retrieve a list of the questions the survey asked using the survey_questions function and the survey id.
 ```{r}
+#| warning: false
+#| message: false
 questions <- survey_questions(id)
 kable(questions) %>%
     kable_styling()
@@ -51,6 +61,8 @@ survey_results <- fetch_survey(id)
 
 ## Question 2
 ```{r}
+#| warning: false
+#| message: false
 q2 <- survey_results %>% 
     select(Q2) %>% 
     group_by(Q2) %>% 
@@ -59,6 +71,8 @@ q2 <- survey_results %>%
 
 
 ```{r}
+#| warning: false
+#| message: false
 kable(q2, col.names = c("How long have you been programming?",
                         "Number of responses")) %>%
     kable_styling()
@@ -66,6 +80,8 @@ kable(q2, col.names = c("How long have you been programming?",
 
 ## Question 3
 ```{r}
+#| warning: false
+#| message: false
 q3 <- survey_results %>% 
     select(Q3) %>% 
     group_by(Q3) %>% 
@@ -73,6 +89,8 @@ q3 <- survey_results %>%
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 ggplot(data = q3, 
        mapping = aes(x = Q3, y = n)) +
     geom_col() +
@@ -81,6 +99,8 @@ ggplot(data = q3,
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 q3_text <- survey_results %>% 
     select(Q3_7_TEXT) %>% 
     drop_na()
@@ -91,6 +111,8 @@ kable(q3_text, col.names = c("Other responses to 'What language do you currently
 
 ## Question 4
 ```{r}
+#| warning: false
+#| message: false
 q4 <- survey_results %>% 
     select(Q4) %>% 
     rename(`What data science tool or language are you most excited to learn next?` = Q4) %>% 
