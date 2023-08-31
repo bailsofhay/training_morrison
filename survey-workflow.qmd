@@ -1,0 +1,103 @@
+---
+title: "survey-workflow"
+format: html
+---
+
+## Setup
+```{r}
+library(qualtRics)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(kableExtra)
+library(dplyr)
+```
+
+
+```{r}
+# qualtrics_api_credentials(api_key = "Zzuvz4t36VkB5akSB8W3Dryg5YgZ9lowoc3JEfEN", base_url = "ucsb.co1.qualtrics.com", install = TRUE, overwrite = T)
+```
+
+## Get all surveys
+To get a list of all the surveys in your Qualtrics instance, use the all_surveys function.
+```{r}
+surveys <- all_surveys()
+kable(surveys) %>%
+    kable_styling()
+```
+
+## Save survey id
+```{r}
+i <- which(surveys$name == "Survey for Data Science Training")
+id <- surveys$id[i]
+```
+
+## Get questions
+You can retrieve a list of the questions the survey asked using the survey_questions function and the survey id.
+```{r}
+questions <- survey_questions(id)
+kable(questions) %>%
+    kable_styling()
+```
+
+## Get survey results
+To get the full survey results, run fetch_survey with the survey id.
+```{r}
+#| warning: false
+#| message: false
+survey_results <- fetch_survey(id)
+```
+
+
+## Question 2
+```{r}
+q2 <- survey_results %>% 
+    select(Q2) %>% 
+    group_by(Q2) %>% 
+    summarise(n = n())
+```
+
+
+```{r}
+kable(q2, col.names = c("How long have you been programming?",
+                        "Number of responses")) %>%
+    kable_styling()
+```
+
+## Question 3
+```{r}
+q3 <- survey_results %>% 
+    select(Q3) %>% 
+    group_by(Q3) %>% 
+    summarise(n = n())
+```
+
+```{r}
+ggplot(data = q3, 
+       mapping = aes(x = Q3, y = n)) +
+    geom_col() +
+    labs(x = "What language do you currently use most frequently?", y = "Number of reponses") +
+    theme_minimal()
+```
+
+```{r}
+q3_text <- survey_results %>% 
+    select(Q3_7_TEXT) %>% 
+    drop_na()
+
+kable(q3_text, col.names = c("Other responses to 'What language do you currently use mose frequently?'")) %>% 
+    kable_styling()
+```
+
+## Question 4
+```{r}
+q4 <- survey_results %>% 
+    select(Q4) %>% 
+    rename(`What data science tool or language are you most excited to learn next?` = Q4) %>% 
+    drop_na()
+
+kable(q4, col.names = "What data science tool or language are you most excited to learn next?") %>% 
+    kable_styling()
+```
+
+
