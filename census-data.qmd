@@ -14,6 +14,8 @@ library(tidycensus)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(scales)
+library(stringr)
 ```
 
 ## Getting Started
@@ -120,9 +122,65 @@ delta_race <- get_decennial(
 ```
 
 # Getting Census Data ready for analysis
+Notes on get_acs()
+```{r}
+## 1-year survey
+median_income_1yr <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  state = "CA",
+  year = 2021,
+  survey = "acs1")
+
+## 5-year survey. Defaults to the 2017-2021 5-year ACS
+median_income_5yr <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  state = "CA")
+```
+## Load variables for “acs5”, year 2021.
+```{r}
+#| warning: false
+#| message: false
+## variables for 5-year 2017-2021 ACS
+vars <- load_variables(2021, "acs5")
+```
+
+## Find code for total median gross rent.
+Get acs data for median gross rent by county in California
+```{r}
+ca_rent <- get_acs(
+  geography = "county",
+  variables = "B25031_001",
+  state = "CA",
+  year = 2021)
+```
+
+## Visualize estimate by county using geom_point. (Hint: use y = reorder(NAME, estimate) to order counties by estimates)
+```{r}
+#| warning: false
+#| message: false
+ggplot(ca_rent, aes(x = estimate, y = reorder(NAME, estimate)))+
+  geom_point()+
+  theme_classic()
+```
+
+## Add the following layer, one by one, to your plot. Discuss with your neighbor what each line of code is doing.
+```{r}
+#| warning: false
+#| message: false
+#| fig-width: 8
+#| fig-height: 12
 
 
+ggplot(ca_rent, aes(x = estimate, y = reorder(NAME, estimate)))+
+  geom_point()+
+  theme_classic()+
+  labs(x = "Estimate ($)", y = "CA County")+
+  geom_errorbar(aes(xmin = estimate - moe, xmax = estimate + moe),
+                width = 0.5, linewidth = 0.5)+
+  scale_x_continuous(labels = label_dollar())+
+  scale_y_discrete(labels = function(x) stringr::str_remove(x, " County, California|, California"))
 
-
-
+```
 
