@@ -1,0 +1,17 @@
+---
+title: "Mapping Census Data"
+author: "Bailey Morrison"
+format: html
+---
+
+## Load Libraries
+```{r}
+library(tidycensus)
+library(mapview)
+library(tigris)
+library(ggplot2)
+library(dplyr)
+library(sf)
+
+```
+
